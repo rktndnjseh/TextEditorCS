@@ -18,6 +18,7 @@ namespace firstProject
             // 기본 언어 설정 (시스템 언어 기준)
             string systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             ChangeLanguage(systemLanguage == "ko" ? "ko" : "en");
+            InitializePluginMenu();
             InitializeAutoSave();
         }
 
@@ -242,6 +243,62 @@ namespace firstProject
         {
             return txtEditor.Text; // 예제: textBox1의 텍스트 저장
         }
+        //플러그인 로드
+        private void LoadPlugins()
+        {
+            string pluginDirectory = Path.Combine(Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName, "Plugins");
+            var loader = new PluginLoader(pluginDirectory);
+            var plugins = loader.LoadPlugins();
+            MessageBox.Show(pluginDirectory, "플러그인 로드", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(File.Exists(Path.Combine(pluginDirectory, "SamplePlugin.dll"))
+    ? "SamplePlugin.dll exists."
+    : "SamplePlugin.dll not found.", "플러그인 로드", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            if (plugins.Count == 0)
+            {
+                MessageBox.Show("로드할 플러그인이 없습니다.", "플러그인 로드", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            foreach (var plugin in plugins)
+            {
+                ToolStripMenuItem pluginMenuItem = new ToolStripMenuItem
+                {
+                    Text = plugin.Name,
+                    Tag = plugin
+                };
+
+                pluginMenuItem.Click += (sender, e) =>
+                {
+                    plugin.Execute();
+                };
+
+                플러그인ToolStripMenuItem.DropDownItems.Add(pluginMenuItem); // 플러그인 메뉴에 추가
+            }
+
+            MessageBox.Show($"{plugins.Count}개의 플러그인을 로드했습니다.", "플러그인 로드 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void InitializePluginMenu()
+        {
+            ToolStripMenuItem pluginMenu = new ToolStripMenuItem
+            {
+                Name = "PluginMenu",
+                Text = "플러그인"
+            };
+
+            ToolStripMenuItem loadPluginMenu = new ToolStripMenuItem
+            {
+                Name = "LoadPluginMenu",
+                Text = "플러그인 로드"
+            };
+            loadPluginMenu.Click += (sender, e) => LoadPlugins();
+
+            pluginMenu.DropDownItems.Add(loadPluginMenu);
+            menuStrip1.Items.Add(pluginMenu); // 메인 메뉴에 추가
+        }
+
+
 
     }
     // 간단한 입력 창(Prompt) 클래스
