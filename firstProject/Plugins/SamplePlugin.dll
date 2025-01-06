@@ -1,0 +1,15 @@
+﻿using firstProject;
+using System.Windows.Forms;
+
+public class SamplePlugin : IPlugin
+{
+    public SamplePlugin() { } // 기본 생성자 필요
+
+    public string Name => "샘플 플러그인";
+    public string Description => "텍스트를 대문자로 변환합니다.";
+
+    public void Execute()
+    {
+        MessageBox.Show("샘플 플러그인이 실행되었습니다!", "플러그인 실행", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+}
