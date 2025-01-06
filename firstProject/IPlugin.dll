@@ -1,0 +1,10 @@
+﻿
+namespace firstProject
+{
+    internal interface IPlugin
+    {
+        string Name { get; }  // 플러그인 이름
+        string Description { get; }  // 플러그인 설명
+        void Execute();  // 플러그인이 실행할 동작
+    }
+}
