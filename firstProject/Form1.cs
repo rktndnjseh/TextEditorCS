@@ -1,21 +1,27 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace firstProject
 {
     public partial class Form1 : Form
     {
+        private System.Windows.Forms.Timer autoSaveTimer;
+        private string savedFilePath = null; // ì €ìž¥ëœ íŒŒì¼ ê²½ë¡œ
+        private bool isFileSaved = false;   // íŒŒì¼ ì €ìž¥ ì—¬ë¶€ í”Œëž˜ê·¸
+
         public Form1()
         {
             InitializeComponent();
             InitializeLanguageMenu();
-            // ±âº» ¾ð¾î ¼³Á¤ (½Ã½ºÅÛ ¾ð¾î ±âÁØ)
+            // ê¸°ë³¸ ì–¸ì–´ ì„¤ì • (ì‹œìŠ¤í…œ ì–¸ì–´ ê¸°ì¤€)
             string systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             ChangeLanguage(systemLanguage == "ko" ? "ko" : "en");
+            InitializeAutoSave();
         }
 
-        // "»õ·Î ¸¸µé±â" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+        // "ìƒˆë¡œ ë§Œë“¤ê¸°" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void NewFile_Click(object sender, EventArgs e)
         {
             if (ConfirmSave())
@@ -24,31 +30,49 @@ namespace firstProject
             }
         }
 
-        // "¿­±â" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+        // "ì—´ê¸°" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void OpenFile_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "ÅØ½ºÆ® ÆÄÀÏ (*.txt)|*.txt|¸ðµç ÆÄÀÏ (*.*)|*.*";
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Filter = "í…ìŠ¤íŠ¸ íŒŒì¼ (*.txt)|*.txt|ëª¨ë“  íŒŒì¼ (*.*)|*.*"
+            };
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 txtEditor.Text = File.ReadAllText(openFileDialog.FileName);
+                savedFilePath = openFileDialog.FileName;
+                isFileSaved = true; // íŒŒì¼ ì—´ê¸° ì‹œ ìžë™ ì €ìž¥ í™œì„±í™”
             }
         }
 
-        // "ÀúÀå" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+
+        // "ì €ìž¥" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void SaveFile_Click(object sender, EventArgs e)
         {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "ÅØ½ºÆ® ÆÄÀÏ (*.txt)|*.txt|¸ðµç ÆÄÀÏ (*.*)|*.*";
-
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            if (string.IsNullOrEmpty(savedFilePath))
             {
-                File.WriteAllText(saveFileDialog.FileName, txtEditor.Text);
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "í…ìŠ¤íŠ¸ íŒŒì¼ (*.txt)|*.txt|ëª¨ë“  íŒŒì¼ (*.*)|*.*"
+                };
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    savedFilePath = saveFileDialog.FileName;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(savedFilePath))
+            {
+                File.WriteAllText(savedFilePath, txtEditor.Text);
+                isFileSaved = true; // íŒŒì¼ ì €ìž¥ ì„±ê³µ ì‹œ í”Œëž˜ê·¸ ì—…ë°ì´íŠ¸
             }
         }
 
-        // "Á¾·á" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+
+
+        // "ì¢…ë£Œ" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void Exit_Click(object sender, EventArgs e)
         {
             if (ConfirmSave())
@@ -57,30 +81,30 @@ namespace firstProject
             }
         }
 
-        // "Á¤º¸" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+        // "ì •ë³´" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void About_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("C#À¸·Î ¸¸µç °£´ÜÇÑ ¸Þ¸ðÀåÀÔ´Ï´Ù!", "Á¤º¸", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("C#ìœ¼ë¡œ ë§Œë“  ê°„ë‹¨í•œ ë©”ëª¨ìž¥ìž…ë‹ˆë‹¤!", "ì •ë³´", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // ÀúÀå ¿©ºÎ È®ÀÎ
+        // ì €ìž¥ ì—¬ë¶€ í™•ì¸
         private bool ConfirmSave()
         {
-            var result = MessageBox.Show("ÇöÀç ³»¿ëÀ» ÀúÀåÇÏ½Ã°Ú½À´Ï±î?", "ÀúÀå È®ÀÎ", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            var result = MessageBox.Show("í˜„ìž¬ ë‚´ìš©ì„ ì €ìž¥í•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì €ìž¥ í™•ì¸", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
-                SaveFile_Click(null, null); // ÀúÀå
+                SaveFile_Click(null, null); // ì €ìž¥
                 return true;
             }
             else if (result == DialogResult.No)
             {
-                return true; // ÀúÀåÇÏÁö ¾Ê°í ÁøÇà
+                return true; // ì €ìž¥í•˜ì§€ ì•Šê³  ì§„í–‰
             }
 
-            return false; // Ãë¼Ò
+            return false; // ì·¨ì†Œ
         }
-        //"±Û²Ã º¯°æ" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+        //"ê¸€ê¼´ ë³€ê²½" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void ChangeFont_Click(object sender, EventArgs e)
         {
             using (FontDialog fontDialog = new FontDialog())
@@ -92,10 +116,10 @@ namespace firstProject
                 }
             }
         }
-        // "Ã£±â" ¸Þ´º Å¬¸¯ ÀÌº¥Æ®
+        // "ì°¾ê¸°" ë©”ë‰´ í´ë¦­ ì´ë²¤íŠ¸
         private void FindText_Click(object sender, EventArgs e)
         {
-            string searchText = Prompt.ShowDialog("°Ë»öÇÒ ÅØ½ºÆ®¸¦ ÀÔ·ÂÇÏ¼¼¿ä:", "Ã£±â");
+            string searchText = Prompt.ShowDialog("ê²€ìƒ‰í•  í…ìŠ¤íŠ¸ë¥¼ ìž…ë ¥í•˜ì„¸ìš”:", "ì°¾ê¸°");
             if (!string.IsNullOrEmpty(searchText))
             {
                 int startIndex = txtEditor.Find(searchText);
@@ -107,7 +131,7 @@ namespace firstProject
                 }
                 else
                 {
-                    MessageBox.Show("°Ë»ö °á°ú°¡ ¾ø½À´Ï´Ù.", "Ã£±â", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("ê²€ìƒ‰ ê²°ê³¼ê°€ ì—†ìŠµë‹ˆë‹¤.", "ì°¾ê¸°", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -116,7 +140,7 @@ namespace firstProject
             ToolStripMenuItem koreanMenu = new ToolStripMenuItem
             {
                 Name = "KoreanMenu",
-                Text = "ÇÑ±¹¾î"
+                Text = "í•œêµ­ì–´"
             };
             koreanMenu.Click += (sender, e) => ChangeLanguage("ko");
 
@@ -127,25 +151,30 @@ namespace firstProject
             };
             englishMenu.Click += (sender, e) => ChangeLanguage("en");
 
-            ¾ð¾îToolStripMenuItem.DropDownItems.Clear();
-            ¾ð¾îToolStripMenuItem.DropDownItems.Add(koreanMenu);
-            ¾ð¾îToolStripMenuItem.DropDownItems.Add(englishMenu);
+            ì–¸ì–´ToolStripMenuItem.DropDownItems.Clear();
+            ì–¸ì–´ToolStripMenuItem.DropDownItems.Add(koreanMenu);
+            ì–¸ì–´ToolStripMenuItem.DropDownItems.Add(englishMenu);
         }
 
         private void ChangeLanguage(string cultureCode)
         {
-            // ¾ð¾î º¯°æ
+            // ì–¸ì–´ ë³€ê²½
             System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(cultureCode);
 
-            // ¸ðµç ÄÁÆ®·Ñ¿¡ º¯°æµÈ ¸®¼Ò½º Àû¿ë
+            // ëª¨ë“  ì»¨íŠ¸ë¡¤ì— ë³€ê²½ëœ ë¦¬ì†ŒìŠ¤ ì ìš©
             ApplyLanguage();
 
-            // Æû ÅØ½ºÆ®µµ ¾÷µ¥ÀÌÆ®
+            // í¼ í…ìŠ¤íŠ¸ë„ ì—…ë°ì´íŠ¸
             Text = Properties.Resources.FormTitle;
         }
 
         private void ApplyLanguage()
         {
+            foreach (Control control in Controls)
+            {
+                control.Text = GetResourceString(control.Name, control.Text);
+            }
+
             foreach (ToolStripItem item in menuStrip1.Items)
             {
                 if (item is ToolStripMenuItem menuItem)
@@ -155,7 +184,7 @@ namespace firstProject
                 }
             }
 
-            Text = GetResourceString("$this", Text); // Æû Á¦¸ñ ±âº»°ª
+            Text = GetResourceString("$this", Text); // í¼ ì œëª© ê¸°ë³¸ê°’
         }
 
         private void ApplyLanguageToMenu(ToolStripMenuItem menuItem)
@@ -176,9 +205,46 @@ namespace firstProject
             return string.IsNullOrEmpty(resourceValue) ? defaultValue : resourceValue;
         }
 
+        // ìžë™ ì €ìž¥ íƒ€ì´ë¨¸ ì´ˆê¸°í™”
+        private void InitializeAutoSave()
+        {
+            autoSaveTimer = new System.Windows.Forms.Timer();
+            autoSaveTimer.Interval = 5000; // 5ì´ˆë§ˆë‹¤ ì €ìž¥
+            autoSaveTimer.Tick += AutoSaveTimer_Tick;
+            autoSaveTimer.Start();
+        }
+        // ìžë™ ì €ìž¥ íƒ€ì´ë¨¸ ì´ë²¤íŠ¸
+        private void AutoSaveTimer_Tick(object sender, EventArgs e)
+        {
+            if (isFileSaved && !string.IsNullOrEmpty(savedFilePath))
+            {
+                AutoSave();
+            }
+        }
+
+        // ìžë™ ì €ìž¥ ë©”ì„œë“œ
+        private void AutoSave()
+        {
+            try
+            {
+                string dataToSave = GetDataToSave();
+                File.WriteAllText(savedFilePath, dataToSave);
+                Console.WriteLine($"[{DateTime.Now}] Auto-saved to {savedFilePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Auto-save failed: {ex.Message}");
+            }
+        }
+
+        // ì €ìž¥í•  ë°ì´í„° ê°€ì ¸ì˜¤ê¸° (ì˜ˆ: í…ìŠ¤íŠ¸ë°•ìŠ¤ ë°ì´í„°)
+        private string GetDataToSave()
+        {
+            return txtEditor.Text; // ì˜ˆì œ: textBox1ì˜ í…ìŠ¤íŠ¸ ì €ìž¥
+        }
 
     }
-    // °£´ÜÇÑ ÀÔ·Â Ã¢(Prompt) Å¬·¡½º
+    // ê°„ë‹¨í•œ ìž…ë ¥ ì°½(Prompt) í´ëž˜ìŠ¤
     public static class Prompt
     {
         public static string ShowDialog(string text, string caption)
@@ -190,8 +256,8 @@ namespace firstProject
                 Text = caption
             };
             Label label = new Label { Left = 10, Top = 10, Text = text };
-            TextBox textBox = new TextBox { Left = 10, Top = 40, Width = 360 };
-            Button confirmation = new Button { Text = "È®ÀÎ", Left = 290, Width = 80, Top = 70 };
+            System.Windows.Forms.TextBox textBox = new System.Windows.Forms.TextBox { Left = 10, Top = 40, Width = 360 };
+            System.Windows.Forms.Button confirmation = new System.Windows.Forms.Button { Text = "í™•ì¸", Left = 290, Width = 80, Top = 70 };
             confirmation.Click += (sender, e) => { prompt.DialogResult = DialogResult.OK; prompt.Close(); };
             prompt.Controls.Add(label);
             prompt.Controls.Add(textBox);
