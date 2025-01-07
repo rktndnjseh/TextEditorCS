@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows.Forms;
+using Google.Apis.Drive.v3;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace firstProject
@@ -19,6 +20,7 @@ namespace firstProject
             string systemLanguage = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
             ChangeLanguage(systemLanguage == "ko" ? "ko" : "en");
             InitializePluginMenu();
+            InitializeCloudButtons();
             InitializeAutoSave();
         }
 
@@ -298,7 +300,70 @@ namespace firstProject
             menuStrip1.Items.Add(pluginMenu); // 메인 메뉴에 추가
         }
 
+        // 클라우드 버튼 초기화
+        private void InitializeCloudButtons()
+        {
+            ToolStripMenuItem btnSaveToCloud = new ToolStripMenuItem
+            {
+                Name = "btnSaveToCloud",
+                Text = "클라우드 저장"
+            };
+            // "Save to Cloud" 버튼 이벤트 연결
+            btnSaveToCloud.Click += (sender, e) => SaveToCloud_Click(sender, e);
 
+            ToolStripMenuItem btnLoadFromCloud = new ToolStripMenuItem
+            {
+                Name = "btnLoadFromCloud",
+                Text = "클라우드 불러오기"
+            };
+            // "Load from Cloud" 버튼 이벤트 연결
+            btnLoadFromCloud.Click += (sender, e) => LoadFromCloud_Click(sender, e);
+
+            클라우드ToolStripMenuItem.DropDownItems.Clear();
+            클라우드ToolStripMenuItem.DropDownItems.Add(btnSaveToCloud);
+            클라우드ToolStripMenuItem.DropDownItems.Add(btnLoadFromCloud);
+        }
+
+        // "Save to Cloud" 버튼 클릭 이벤트
+        private void SaveToCloud_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var service = GoogleDriveService.Initialize(); // Google Drive 인증 초기화
+                string filePath = "local_file.txt"; // 업로드할 파일 경로
+                File.WriteAllText(filePath, txtEditor.Text); // 텍스트 에디터 내용 저장
+                string fileId = GoogleDriveService.UploadFile(service, filePath, "text/plain"); // 파일 업로드
+                MessageBox.Show($"File uploaded successfully. File ID: {fileId}", "Upload Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error uploading file: {ex.Message}", "Upload Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // "Load from Cloud" 버튼 클릭 이벤트
+        private void LoadFromCloud_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var service = GoogleDriveService.Initialize(); // Google Drive 인증 초기화
+                string fileId = Prompt.ShowDialog("Enter File ID:", "Download File"); // 다운로드할 파일 ID 입력
+                if (string.IsNullOrEmpty(fileId))
+                {
+                    MessageBox.Show("File ID is required!", "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                string savePath = "downloaded_file.txt"; // 다운로드할 파일 경로
+                GoogleDriveService.DownloadFile(service, fileId, savePath); // 파일 다운로드
+                txtEditor.Text = File.ReadAllText(savePath); // 다운로드한 파일 내용을 텍스트 에디터에 로드
+                MessageBox.Show("File downloaded and loaded successfully.", "Download Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error downloading file: {ex.Message}", "Download Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
     }
     // 간단한 입력 창(Prompt) 클래스
