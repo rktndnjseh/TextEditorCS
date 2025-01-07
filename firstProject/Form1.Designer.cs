@@ -1,4 +1,4 @@
-﻿namespace firstProject
+namespace firstProject
 {
     partial class Form1
     {
@@ -44,6 +44,10 @@
             언어ToolStripMenuItem = new ToolStripMenuItem();
             toolStripMenuItem2 = new ToolStripMenuItem();
             toolStripMenuItem3 = new ToolStripMenuItem();
+            플러그인ToolStripMenuItem = new ToolStripMenuItem();
+            클라우드ToolStripMenuItem = new ToolStripMenuItem();
+            클라우드저장ToolStripMenuItem = new ToolStripMenuItem();
+            클라우드불러오기ToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -136,7 +140,7 @@
             // 
             // 도구ToolStripMenuItem
             // 
-            도구ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 언어ToolStripMenuItem });
+            도구ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 언어ToolStripMenuItem, 플러그인ToolStripMenuItem, 클라우드ToolStripMenuItem });
             도구ToolStripMenuItem.Name = "ToolMenu";
             도구ToolStripMenuItem.Size = new Size(43, 20);
             도구ToolStripMenuItem.Text = "도구";
@@ -150,15 +154,42 @@
             // 
             // toolStripMenuItem2
             // 
-            toolStripMenuItem2.Name = "한국어";
-            toolStripMenuItem2.Size = new Size(180, 22);
+            toolStripMenuItem2.Name = "KoreanMenu";
+            toolStripMenuItem2.Size = new Size(112, 22);
             toolStripMenuItem2.Text = "한국어";
             // 
             // toolStripMenuItem3
             // 
-            toolStripMenuItem3.Name = "English";
-            toolStripMenuItem3.Size = new Size(180, 22);
+            toolStripMenuItem3.Name = "EnglishMenu";
+            toolStripMenuItem3.Size = new Size(112, 22);
             toolStripMenuItem3.Text = "English";
+            // 
+            // 플러그인ToolStripMenuItem
+            // 
+            플러그인ToolStripMenuItem.Name = "PluginMenu";
+            플러그인ToolStripMenuItem.Size = new Size(180, 22);
+            플러그인ToolStripMenuItem.Text = "플러그인";
+            // 
+            // 클라우드ToolStripMenuItem
+            // 
+            클라우드ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 클라우드저장ToolStripMenuItem, 클라우드불러오기ToolStripMenuItem });
+            클라우드ToolStripMenuItem.Name = "CloudMenu";
+            클라우드ToolStripMenuItem.Size = new Size(180, 22);
+            클라우드ToolStripMenuItem.Text = "클라우드";
+            // 
+            // 클라우드저장ToolStripMenuItem
+            // 
+            클라우드저장ToolStripMenuItem.Name = "btnSaveToCloud";
+            클라우드저장ToolStripMenuItem.Size = new Size(180, 22);
+            클라우드저장ToolStripMenuItem.Text = "클라우드 저장";
+            클라우드저장ToolStripMenuItem.Click += SaveToCloud_Click;
+            // 
+            // 클라우드불러오기ToolStripMenuItem
+            // 
+            클라우드불러오기ToolStripMenuItem.Name = "btnLoadFromCloud";
+            클라우드불러오기ToolStripMenuItem.Size = new Size(180, 22);
+            클라우드불러오기ToolStripMenuItem.Text = "클라우드 불러오기";
+            클라우드불러오기ToolStripMenuItem.Click += LoadFromCloud_Click;
             // 
             // Form1
             // 
@@ -192,11 +223,11 @@
         private ToolStripMenuItem 찾기ToolStripMenuItem;
         private ToolStripMenuItem 도구ToolStripMenuItem;
         private ToolStripMenuItem 언어ToolStripMenuItem;
-        private ToolStripMenuItem 한국어ToolStripMenuItem;
-        private ToolStripMenuItem 영어ToolStripMenuItem;
-        private ToolStripMenuItem 한국어ToolStripMenuItem1;
-        private ToolStripMenuItem englishToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem2;
         private ToolStripMenuItem toolStripMenuItem3;
+        private ToolStripMenuItem 플러그인ToolStripMenuItem;
+        private ToolStripMenuItem 클라우드ToolStripMenuItem;
+        private ToolStripMenuItem 클라우드저장ToolStripMenuItem;
+        private ToolStripMenuItem 클라우드불러오기ToolStripMenuItem;
     }
 }
